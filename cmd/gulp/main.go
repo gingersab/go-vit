@@ -8,6 +8,7 @@ import (
 
 func main() {
 
+	//TODO: Refactor the invocations of resource acquisition to a func(interfaces.SystemResourceAcquirer)
 	var sra interfaces.SystemResourceAcquirer = models.InitResourceAcquirer()
 	cpu := sra.AcquireCPU()
 	mem := sra.AcquireMem()
