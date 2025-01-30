@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"gulp/internal/mon/core"
 	"gulp/internal/mon/models"
 	"os"
@@ -9,10 +10,11 @@ import (
 )
 
 func main() {
-	sra := models.InitResourceAcquirer()
-	rm := core.InitResourceMonitor()
+	var sra models.SystemResourceAcquirer = models.InitResourceAcquirer()
+	var rm core.Monitor = core.InitResourceMonitor()
+	ctx, cancel := context.WithCancel(context.Background())
 	dur := 1000 * time.Millisecond
-	rm.Start(sra, dur)
+	rm.Start(ctx, sra, dur)
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
-	rm.Stop()
+	cancel()
 }

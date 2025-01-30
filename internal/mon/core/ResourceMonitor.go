@@ -1,27 +1,24 @@
 package core
 
 import (
+	"context"
 	"gulp/internal/mon/models"
 	"gulp/internal/pkg/gulplog"
 	"time"
 )
 
 type Monitor interface {
-	Start(models.SystemResourceAcquirer, time.Duration)
-	Stop()
+	Start(context.Context, models.SystemResourceAcquirer, time.Duration)
 }
 
 type ResourceMonitor struct {
-	stopChan chan struct{}
 }
 
 func InitResourceMonitor() *ResourceMonitor {
-	return &ResourceMonitor{
-		stopChan: make(chan struct{}),
-	}
+	return &ResourceMonitor{}
 }
 
-func (rm *ResourceMonitor) Start(sre models.SystemResourceAcquirer, freq time.Duration) {
+func (rm *ResourceMonitor) Start(ctx context.Context, sre models.SystemResourceAcquirer, freq time.Duration) {
 	interval := time.NewTicker(freq)
 
 	go func() {
@@ -33,14 +30,11 @@ func (rm *ResourceMonitor) Start(sre models.SystemResourceAcquirer, freq time.Du
 				mem := sre.AcquireMem()
 				gulplog.Info.Printf("CPU usage: %.2f%%\n", cpu)
 				gulplog.Info.Printf("Memory usage: %.2f%%\n", mem)
-			case <-rm.stopChan:
+			case <-ctx.Done():
+				interval.Stop()
+				gulplog.Info.Println("Stopping resource monitoring")
 				return
 			}
 		}
 	}()
-}
-
-func (rm *ResourceMonitor) Stop() {
-	gulplog.Info.Println("Stopping resource monitoring")
-	close(rm.stopChan)
 }
