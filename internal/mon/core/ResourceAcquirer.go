@@ -13,8 +13,8 @@ import (
 )
 
 type SystemResourceAcquirer interface {
-	AcquireCPU() float64
-	AcquireMem() float64
+	AcquireCPU() (float64, error)
+	AcquireMem() (float64, error)
 	AcquireDisc() (*models.DriveInfo, error)
 }
 
@@ -24,12 +24,13 @@ func InitResourceAcquirer() *ResourceAcquirer {
 	return &ResourceAcquirer{}
 }
 
-func (ResourceAcquirer) AcquireCPU() float64 {
+func (ResourceAcquirer) AcquireCPU() (float64, error) {
 	percent, err := cpu.Percent(time.Second, false)
 	if err != nil {
-		gulplog.Info.Printf("Failed to retrieve CPU usage statistics: %s", err)
+		gulplog.Error.Print(err)
+		return 0.0, fmt.Errorf("failed to retrieve CPU statistics")
 	}
-	return float64(int(percent[0]*100)) / 100
+	return float64(int(percent[0]*100)) / 100, nil
 }
 
 func (ResourceAcquirer) AcquireDisc() (*models.DriveInfo, error) {
@@ -69,10 +70,11 @@ func (ResourceAcquirer) AcquireDisc() (*models.DriveInfo, error) {
 	return nil, fmt.Errorf("failed to identify currently active drive")
 }
 
-func (ResourceAcquirer) AcquireMem() float64 {
+func (ResourceAcquirer) AcquireMem() (float64, error) {
 	vmem, err := mem.VirtualMemory()
 	if err != nil {
-		gulplog.Info.Printf("Failed to retrieve virtual memory usage statistics: %s", err)
+		gulplog.Error.Print(err)
+		return 0.0, fmt.Errorf("failed to retrieve virtual memory statistics")
 	}
-	return float64(int(vmem.UsedPercent*100)) / 100
+	return float64(int(vmem.UsedPercent*100)) / 100, nil
 }

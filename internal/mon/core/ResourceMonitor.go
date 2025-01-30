@@ -25,8 +25,14 @@ func (rm *ResourceMonitor) Start(ctx context.Context, sre SystemResourceAcquirer
 		for {
 			select {
 			case <-interval.C:
-				cpu := sre.AcquireCPU()
-				mem := sre.AcquireMem()
+				cpu, err := sre.AcquireCPU()
+				if err != nil {
+					gulplog.Error.Println(err)
+				}
+				mem, err := sre.AcquireMem()
+				if err != nil {
+					gulplog.Error.Println(err)
+				}
 				driveInfo, err := sre.AcquireDisc()
 				if err != nil {
 					gulplog.Error.Println(err)
