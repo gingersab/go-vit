@@ -34,22 +34,20 @@ func (ResourceAcquirer) AcquireCPU() (float64, error) {
 }
 
 func (ResourceAcquirer) AcquireDisc() (*models.DriveInfo, error) {
-	// Step 1: Get the current working directory
 	currentDir, err := os.Getwd()
 	if err != nil {
 		logfmt.Error.Println(err)
 	}
 
-	// Step 2: Get the list of partitions
-	partitions, err := disk.Partitions(true) // true for detailed info
+	partitions, err := disk.Partitions(true)
 	if err != nil {
 		logfmt.Error.Println(err)
 	}
 
-	// Step 3: Find the partition that corresponds to the current working directory
+	// Find the partition that corresponds to the current working directory
 	for _, part := range partitions {
 		if currentDir == part.Mountpoint || currentDir[:len(part.Mountpoint)] == part.Mountpoint {
-			// Match found, print the drive name (device) and its usage stats
+			// Retrieve drive information and statistics
 			usage, err := disk.Usage(part.Mountpoint)
 			if err != nil {
 				logfmt.Error.Println(err)
