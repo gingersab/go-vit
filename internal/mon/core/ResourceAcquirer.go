@@ -2,8 +2,8 @@ package core
 
 import (
 	"fmt"
-	"gulp/internal/mon/models"
-	"gulp/internal/pkg/gulplog"
+	"go-vit/internal/mon/models"
+	"go-vit/internal/pkg/logfmt"
 	"os"
 	"time"
 
@@ -27,7 +27,7 @@ func InitResourceAcquirer() *ResourceAcquirer {
 func (ResourceAcquirer) AcquireCPU() (float64, error) {
 	percent, err := cpu.Percent(time.Second, false)
 	if err != nil {
-		gulplog.Error.Print(err)
+		logfmt.Error.Print(err)
 		return 0.0, fmt.Errorf("failed to retrieve CPU statistics")
 	}
 	return float64(int(percent[0]*100)) / 100, nil
@@ -37,13 +37,13 @@ func (ResourceAcquirer) AcquireDisc() (*models.DriveInfo, error) {
 	// Step 1: Get the current working directory
 	currentDir, err := os.Getwd()
 	if err != nil {
-		gulplog.Error.Println(err)
+		logfmt.Error.Println(err)
 	}
 
 	// Step 2: Get the list of partitions
 	partitions, err := disk.Partitions(true) // true for detailed info
 	if err != nil {
-		gulplog.Error.Println(err)
+		logfmt.Error.Println(err)
 	}
 
 	// Step 3: Find the partition that corresponds to the current working directory
@@ -52,7 +52,7 @@ func (ResourceAcquirer) AcquireDisc() (*models.DriveInfo, error) {
 			// Match found, print the drive name (device) and its usage stats
 			usage, err := disk.Usage(part.Mountpoint)
 			if err != nil {
-				gulplog.Error.Println(err)
+				logfmt.Error.Println(err)
 			}
 
 			d := models.DriveInfo{
@@ -73,7 +73,7 @@ func (ResourceAcquirer) AcquireDisc() (*models.DriveInfo, error) {
 func (ResourceAcquirer) AcquireMem() (float64, error) {
 	vmem, err := mem.VirtualMemory()
 	if err != nil {
-		gulplog.Error.Print(err)
+		logfmt.Error.Print(err)
 		return 0.0, fmt.Errorf("failed to retrieve virtual memory statistics")
 	}
 	return float64(int(vmem.UsedPercent*100)) / 100, nil

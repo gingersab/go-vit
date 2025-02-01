@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
-	"gulp/internal/mon/core"
+	"go-vit/internal/mon/core"
 	"os"
 	"time"
 )

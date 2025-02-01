@@ -1,4 +1,4 @@
-module gulp
+module go-vit
 
 go 1.23.5
 

@@ -1,4 +1,4 @@
-package gulplog
+package logfmt
 
 import (
 	"log"
