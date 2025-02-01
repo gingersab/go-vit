@@ -1,7 +1,12 @@
+use std::process::Command;
+
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+    let output = Command::new("../../go-vit")
+        .output()
+        .expect("Failed to execute Go binary");
+    String::from_utf8_lossy(&output.stdout).to_string()
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
