@@ -4,6 +4,7 @@ import (
 	"context"
 	"go-vit/internal/mon/core"
 	"go-vit/internal/mon/ws"
+	"go-vit/internal/pkg/logfmt"
 	"net/http"
 	"time"
 )
@@ -30,6 +31,7 @@ func main() {
 	go func() {
 		for {
 			stats := rm.Start(ctx, sra, dur)
+			logfmt.Info.Println(stats.Cpu)
 			wsServer.Broadcast(stats)
 			time.Sleep(dur)
 		}

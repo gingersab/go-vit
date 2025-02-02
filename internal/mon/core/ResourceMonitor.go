@@ -21,7 +21,7 @@ func InitResourceMonitor() *ResourceMonitor {
 func (rm *ResourceMonitor) Start(ctx context.Context, sre SystemResourceAcquirer, freq time.Duration) *models.ResourceStats {
 	interval := time.NewTicker(freq)
 	stats := &models.ResourceStats{}
-
+	statsChan := make(chan *models.ResourceStats)
 	go func() {
 		for {
 			select {
@@ -32,13 +32,14 @@ func (rm *ResourceMonitor) Start(ctx context.Context, sre SystemResourceAcquirer
 				stats.Cpu = cpu
 				stats.Drive = *driveInfo
 				stats.Mem = mem
+				statsChan <- stats
 			case <-ctx.Done():
 				interval.Stop()
 				return
 			}
 		}
 	}()
-	return stats
+	return <-statsChan
 }
 
 func getCpuStats(sre SystemResourceAcquirer) float64 {
