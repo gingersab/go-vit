@@ -1,20 +1,39 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"go-vit/internal/mon/core"
-	"os"
+	"go-vit/internal/mon/ws"
+	"net/http"
 	"time"
 )
 
 func main() {
 	var sra core.SystemResourceAcquirer = core.InitResourceAcquirer()
 	var rm core.Monitor = core.InitResourceMonitor()
-	ctx, cancel := context.WithCancel(context.Background())
+	var wsServer ws.WebSocketServer = ws.InitWebSocketServer()
+
+	ctx, _ := context.WithCancel(context.Background())
 	dur := 1000 * time.Millisecond
-	rm.Start(ctx, sra, dur)
-	bufio.NewReader(os.Stdin).ReadBytes('\n')
-	cancel()
-	time.Sleep(dur)
+
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		client := ws.InitClient(w, r)
+		if client != nil {
+			wsServer.AddClient(client)
+			go func() {
+				client.WaitForClose()
+				wsServer.RemoveClient(client)
+			}()
+		}
+	})
+
+	go func() {
+		for {
+			stats := rm.Start(ctx, sra, dur)
+			wsServer.Broadcast(stats)
+			time.Sleep(dur)
+		}
+	}()
+
+	http.ListenAndServe(":8080", nil)
 }

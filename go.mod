@@ -2,7 +2,10 @@ module go-vit
 
 go 1.23.5
 
-require github.com/shirou/gopsutil/v4 v4.24.12
+require (
+	github.com/gorilla/websocket v1.5.3
+	github.com/shirou/gopsutil/v4 v4.24.12
+)
 
 require (
 	github.com/ebitengine/purego v0.8.1 // indirect

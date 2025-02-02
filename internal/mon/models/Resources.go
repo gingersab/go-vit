@@ -9,3 +9,9 @@ type DriveInfo struct {
 	Free   uint64
 	Perc   float64
 }
+
+type ResourceStats struct {
+	Drive DriveInfo
+	Cpu   float64
+	Mem   float64
+}
